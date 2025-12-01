@@ -15,7 +15,6 @@ class Program
             Console.WriteLine("Type 'a' for Thread + Join async");
             Console.WriteLine("Type 'b' for Task async");
             Console.WriteLine("Type 'c' for async/await async");
-            Console.WriteLine("Type 'd' for async http calls");
             Console.WriteLine("Type 'q' for quitting");
             Console.WriteLine("Select an option!");
 
@@ -55,73 +54,6 @@ class Program
                     case "c":
                     await AsyncOrchestration.StartAllDronesAsync();
                     break;
-                    case "d":
-                    {
-                        using var cts = new CancellationTokenSource();
-
-                        _ = Task.Run(() =>
-                    {
-                        Console.WriteLine("Press 'c' to cancel all drones.");
-                        while (true)
-                        {
-                            var key = Console.ReadKey(true);
-                            if (key.KeyChar == 'c' || key.KeyChar == 'C')
-                            {
-                                Console.WriteLine("Cancelation done by user.");
-                                cts.Cancel();
-                                break;
-                            }
-                        }
-                    });
-
-                    var droneNames = new[] { "drone1", "drone2", "drone3" };
-
-                    var prepareTasks = new List<Task<DroneModelAPI>>();
-                    foreach (var name in droneNames)
-                    {
-                        prepareTasks.Add(ControlTowerAPI.PrepareDroneAsync(name, cts.Token));
-                    }
-
-                    DroneModelAPI[] prepared;
-                    try
-                    {
-                        prepared = await Task.WhenAll(prepareTasks).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error during upstart: {ex.Message}");
-                        if (ex is AggregateException agg) foreach (var inner in agg.Flatten().InnerExceptions) Console.WriteLine($" - {inner.Message}");
-                        return;
-                    }
-
-                    var runTasks = new List<Task>();
-                    foreach (var d in prepared)
-                    {
-                        runTasks.Add(DroneRunner.RunAsync(d, cts.Token));
-                    }
-
-                    try
-                    {
-                        await Task.WhenAll(runTasks).ConfigureAwait(false);
-                        Console.WriteLine("All drones completed without mistakes.");
-                    }
-                    catch (Exception)
-                    {
-                        var every = Task.WhenAll(runTasks);
-                        if (every.Exception != null)
-                        {
-                            Console.WriteLine("One or more drones has failed:");
-                            foreach (var inner in every.Exception.Flatten().InnerExceptions)
-                            {
-                                Console.WriteLine($" - {inner.GetType().Name}: {inner.Message}");
-                            }
-                        }
-                        else
-                        {
-                        }
-                    }
-                    break;
-                    }
                     case "q":
                     Console.WriteLine("Exiting program");
                     job = false;
