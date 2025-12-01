@@ -19,11 +19,3 @@ public class DroneModel
         FailureAtCheckpoint = failureAtCheckpoint;
     }
 }
-
-public class DroneModelAPI
-{
-    public string Name { get; init; } = "";
-    public int MaxCheckpoints { get; set; }
-    public int DelayMs { get; set; }
-    public int FailureAtCheckpoint { get; init; } = -1;
-}
