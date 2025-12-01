@@ -1,4 +1,4 @@
-/* using System;
+using System;
 using Drone_Dash.Models;
 using Microsoft.VisualBasic;
 
@@ -41,4 +41,4 @@ public class ThreadRace
         Console.WriteLine($"Drone {counter.Name} has finished");
     }
 }
- */
+ 
